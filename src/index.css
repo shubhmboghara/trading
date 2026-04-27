@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface-dark: #0D0D0D;
+  --color-app-bg: #050505;
+  --color-dark-border: #222222;
+  --color-text-main: #E4E4E4;
+}
+
+body {
+  background-color: var(--color-app-bg);
+  color: var(--color-text-main);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #111;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+}

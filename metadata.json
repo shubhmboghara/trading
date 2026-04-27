@@ -1,0 +1,6 @@
+{
+  "name": "Smart Money Swing Trader",
+  "description": "A Swing Trading tool for Indian stocks based on the Smart Money Delivery Spike Strategy. Features technical analysis, battle zones charts, and prompt generation via Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
