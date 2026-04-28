@@ -42,6 +42,9 @@ export const SettingsTab: React.FC<SettingsProps> = ({ settings, setSettings, on
               <option>Nifty 50 (safest)</option>
               <option>Nifty 200 (broader)</option>
               <option>Nifty Midcap 150</option>
+              <option>Nifty Midcap 100</option>
+              <option>Nifty Smallcap 100</option>
+              <option>Nifty 500</option>
             </select>
           </div>
 

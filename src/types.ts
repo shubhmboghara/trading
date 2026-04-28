@@ -23,7 +23,21 @@ export interface AnalysisSectionData {
   futureProjection: string;
 }
 
+export interface ForensicAnalysisData {
+  ticker: string;
+  businessQualityScore: number;
+  cashFlowAssessment: string;
+  solvencyRisk: string;
+  marginTrend: string;
+  forensicRedFlags: string[];
+  fundamentalStrengths: string[];
+  intrinsicValueEstimate: string;
+  finalVerdict: string;
+  thoughtProcess?: string;
+}
+
 export interface AnalysisData {
+  thoughtProcess?: string;
   // PAST DATA
   spikeDate: string;
   avgDelivery30d: string;
@@ -41,6 +55,7 @@ export interface AnalysisData {
   keyResistance: number;
   sectorOutlook: string;
   suggestedTicker: string;
+  recentPrices: number[];
 
   // FUTURE PROJECTION
   entryTriggerPrice: number;
