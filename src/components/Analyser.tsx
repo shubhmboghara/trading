@@ -371,15 +371,17 @@ Output strictly in JSON matching the defined schema. Use the provided instructio
             const histData = await histRes.json();
             if (histData && Array.isArray(histData) && histData.length > 0) {
               histData.forEach((candle: any) => {
-                newChartData.push({
-                   x: candle.time,
-                   y: [
-                     Number(candle.open.toFixed(2)),
-                     Number(candle.high.toFixed(2)),
-                     Number(candle.low.toFixed(2)),
-                     Number(candle.close.toFixed(2))
-                   ]
-                });
+                if (candle && candle.open != null && candle.high != null && candle.low != null && candle.close != null) {
+                  newChartData.push({
+                     x: candle.time,
+                     y: [
+                       Number(candle.open.toFixed(2)),
+                       Number(candle.high.toFixed(2)),
+                       Number(candle.low.toFixed(2)),
+                       Number(candle.close.toFixed(2))
+                     ]
+                  });
+                }
               });
               lastClose = histData[histData.length - 1].close;
               pClose = histData.length > 1 ? histData[histData.length - 2].close : lastClose;
@@ -397,10 +399,10 @@ Output strictly in JSON matching the defined schema. Use the provided instructio
               const d = new Date(now);
               d.setDate(now.getDate() - (parsedData.recentPrices.length - 1 - i));
               const prevCloseVal = i === 0 ? price * 0.99 : parsedData.recentPrices[i - 1];
-              const o = prevCloseVal;
-              const c = price;
-              const h = Math.max(o, c) + (price * 0.005 * Math.random());
-              const l = Math.min(o, c) - (price * 0.005 * Math.random());
+              const o = prevCloseVal || 0;
+              const c = price || 0;
+              const h = Math.max(o, c) + ((price || 1) * 0.005 * Math.random());
+              const l = Math.min(o, c) - ((price || 1) * 0.005 * Math.random());
               newChartData.push({
                 x: d.getTime(),
                 y: [Number(o.toFixed(2)), Number(h.toFixed(2)), Number(l.toFixed(2)), Number(c.toFixed(2))]
@@ -477,10 +479,10 @@ Output strictly in JSON matching the defined schema. Use the provided instructio
                   newChart[newChart.length - 1] = {
                     x: currentCandle.x,
                     y: [
-                      Number(currentCandle.y[0].toFixed(2)),
-                      Number(Math.max(currentCandle.y[1], quoteData.price, quoteData.high || quoteData.price).toFixed(2)),
-                      Number(Math.min(currentCandle.y[2], quoteData.price, quoteData.low || quoteData.price).toFixed(2)),
-                      Number(quoteData.price.toFixed(2))
+                      Number((currentCandle?.y?.[0] || quoteData.price || 0).toFixed(2)),
+                      Number(Math.max(currentCandle?.y?.[1] || 0, quoteData.price || 0, quoteData.high || quoteData.price || 0).toFixed(2)),
+                      Number(Math.min(currentCandle?.y?.[2] || 0, quoteData.price || 0, quoteData.low || quoteData.price || 0).toFixed(2)),
+                      Number((quoteData.price || 0).toFixed(2))
                     ]
                   };
                   return newChart;
@@ -634,13 +636,13 @@ Keep your answer concise, practical, and focused on helping the user make a trad
               <div className="absolute top-10 left-4 z-10 flex gap-4">
                 <div className="flex flex-col">
                   <span className="text-[10px] text-white/30 tracking-widest">CMP</span>
-                  <span className="text-lg font-bold">₹{livePrice.toFixed(2)}</span>
+                  <span className="text-lg font-bold">₹{(livePrice || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-white/30 tracking-widest">CHG</span>
                   <span className={`text-lg font-bold ${(livePrice - prevClose) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                     {(livePrice - prevClose) >= 0 ? '+' : ''}
-                    {(((livePrice - prevClose) / prevClose) * 100).toFixed(2)}%
+                    {(((livePrice - prevClose) / (prevClose || 1)) * 100).toFixed(2)}%
                   </span>
                 </div>
               </div>
@@ -652,17 +654,17 @@ Keep your answer concise, practical, and focused on helping the user make a trad
                   theme: { mode: 'dark' },
                   grid: { borderColor: '#222' },
                   xaxis: { type: 'datetime', labels: { style: { colors: '#666' } }, axisBorder: { color: '#222' }, axisTicks: { color: '#222' } },
-                  yaxis: { labels: { style: { colors: '#666' }, formatter: (v) => v.toFixed(2) } },
+                  yaxis: { labels: { style: { colors: '#666' }, formatter: (v: number) => (v || 0).toFixed(2) } },
                   plotOptions: { candlestick: { colors: { upward: '#22c55e', downward: '#ef4444' }, wick: { useFillColor: true } } },
                   annotations: {
                     yaxis: [
-                      { y: data.battleZoneHigh, y2: data.battleZoneLow, fillColor: '#ED8936', opacity: 0.1 },
-                      { y: data.battleZoneHigh, borderColor: '#ED8936', strokeDashArray: 5, label: { text: `BZ High: ₹${data.battleZoneHigh.toFixed(2)}`, style: { color: '#fff', background: '#ED8936' } } },
-                      { y: data.battleZoneLow, borderColor: '#ED8936', strokeDashArray: 5, label: { text: `BZ Low: ₹${data.battleZoneLow.toFixed(2)}`, style: { color: '#fff', background: '#ED8936' } } },
-                      { y: data.entryTriggerPrice, borderColor: '#D97706', strokeDashArray: 0, borderWidth: 2, label: { text: `Entry: ₹${data.entryTriggerPrice.toFixed(2)}`, position: 'left', style: { color: '#fff', background: '#D97706' } } },
-                      { y: data.stopLossPrice, borderColor: '#DC2626', strokeDashArray: 0, borderWidth: 2, label: { text: `SL: ₹${data.stopLossPrice.toFixed(2)}`, position: 'left', style: { color: '#fff', background: '#DC2626' } } },
-                      { y: data.target1, borderColor: '#86EFAC', strokeDashArray: 0, borderWidth: 2, label: { text: `T1: ₹${data.target1.toFixed(2)}`, position: 'left', style: { color: '#000', background: '#86EFAC' } } },
-                      { y: data.target2, borderColor: '#166534', strokeDashArray: 0, borderWidth: 2, label: { text: `T2: ₹${data.target2.toFixed(2)}`, position: 'left', style: { color: '#fff', background: '#166534' } } }
+                      { y: data.battleZoneHigh || 0, y2: data.battleZoneLow || 0, fillColor: '#ED8936', opacity: 0.1 },
+                      { y: data.battleZoneHigh || 0, borderColor: '#ED8936', strokeDashArray: 5, label: { text: `BZ High: ₹${(data.battleZoneHigh || 0).toFixed(2)}`, style: { color: '#fff', background: '#ED8936' } } },
+                      { y: data.battleZoneLow || 0, borderColor: '#ED8936', strokeDashArray: 5, label: { text: `BZ Low: ₹${(data.battleZoneLow || 0).toFixed(2)}`, style: { color: '#fff', background: '#ED8936' } } },
+                      { y: data.entryTriggerPrice || 0, borderColor: '#D97706', strokeDashArray: 0, borderWidth: 2, label: { text: `Entry: ₹${(data.entryTriggerPrice || 0).toFixed(2)}`, position: 'left', style: { color: '#fff', background: '#D97706' } } },
+                      { y: data.stopLossPrice || 0, borderColor: '#DC2626', strokeDashArray: 0, borderWidth: 2, label: { text: `SL: ₹${(data.stopLossPrice || 0).toFixed(2)}`, position: 'left', style: { color: '#fff', background: '#DC2626' } } },
+                      { y: data.target1 || 0, borderColor: '#86EFAC', strokeDashArray: 0, borderWidth: 2, label: { text: `T1: ₹${(data.target1 || 0).toFixed(2)}`, position: 'left', style: { color: '#000', background: '#86EFAC' } } },
+                      { y: data.target2 || 0, borderColor: '#166534', strokeDashArray: 0, borderWidth: 2, label: { text: `T2: ₹${(data.target2 || 0).toFixed(2)}`, position: 'left', style: { color: '#fff', background: '#166534' } } }
                     ]
                   }
                 }}
@@ -681,8 +683,8 @@ Keep your answer concise, practical, and focused on helping the user make a trad
                 <DataRow label="Avg Delivery %" value={data.avgDelivery30d} />
                 <DataRow label="Spike Day Delivery %" value={data.spikeDayDelivery} />
                 <DataRow label="Spike Strength" value={data.spikeStrength} />
-                <DataRow label="Battle Zone High" value={`₹${data.battleZoneHigh.toFixed(2)}`} />
-                <DataRow label="Battle Zone Low" value={`₹${data.battleZoneLow.toFixed(2)}`} />
+                <DataRow label="Battle Zone High" value={`₹${(data.battleZoneHigh || 0).toFixed(2)}`} />
+                <DataRow label="Battle Zone Low" value={`₹${(data.battleZoneLow || 0).toFixed(2)}`} />
                 <DataRow label="Success Rate" value={data.historicalSuccessRate} />
                 <div className="flex justify-between items-center py-1.5 text-[11px] uppercase tracking-wider mt-2">
                   <span className="text-white/40">Status</span>
@@ -700,11 +702,11 @@ Keep your answer concise, practical, and focused on helping the user make a trad
             <div className="bg-[#0D0D0D] border border-[#222] border-t-4 border-t-[#1D9E75] p-4 rounded-lg">
               <h3 className="text-[10px] font-bold text-[#1D9E75] uppercase tracking-widest mb-4">Future Projection</h3>
               <div className="space-y-1">
-                <DataRow label="Entry Price" value={`₹${data.entryTriggerPrice.toFixed(2)}`} valueClass="font-bold text-amber-500" />
-                <DataRow label="Stop Loss" value={`₹${data.stopLossPrice.toFixed(2)}`} valueClass="font-bold text-red-500" />
-                <DataRow label="Risk Per Share" value={`₹${Number(data.riskPerShare).toFixed(2)}`} />
-                <DataRow label="Target 1" value={`₹${data.target1.toFixed(2)}`} valueClass="font-bold text-green-400" />
-                <DataRow label="Target 2" value={`₹${data.target2.toFixed(2)}`} valueClass="font-bold text-green-500" />
+                <DataRow label="Entry Price" value={`₹${(data.entryTriggerPrice || 0).toFixed(2)}`} valueClass="font-bold text-amber-500" />
+                <DataRow label="Stop Loss" value={`₹${(data.stopLossPrice || 0).toFixed(2)}`} valueClass="font-bold text-red-500" />
+                <DataRow label="Risk Per Share" value={`₹${Number(data.riskPerShare || 0).toFixed(2)}`} />
+                <DataRow label="Target 1" value={`₹${(data.target1 || 0).toFixed(2)}`} valueClass="font-bold text-green-400" />
+                <DataRow label="Target 2" value={`₹${(data.target2 || 0).toFixed(2)}`} valueClass="font-bold text-green-500" />
                 <DataRow label="Days to T1" value={data.estimatedDaysT1} />
                 <DataRow label="Days to T2" value={data.estimatedDaysT2} />
               </div>
@@ -724,10 +726,10 @@ Keep your answer concise, practical, and focused on helping the user make a trad
                 </div>
                 <div className="space-y-1">
                   <DataRow label="Shares to Buy" value={Math.floor(investCapital / data.entryTriggerPrice)} valueClass="font-bold text-blue-400" />
-                  <DataRow label="Total Invested" value={`₹${(Math.floor(investCapital / data.entryTriggerPrice) * data.entryTriggerPrice).toFixed(2)}`} />
-                  <DataRow label="Total Risk" value={`₹${(Math.floor(investCapital / data.entryTriggerPrice) * data.riskPerShare).toFixed(2)}`} valueClass="text-red-400 font-bold" />
-                  <DataRow label="Profit (T1)" value={`₹${(Math.floor(investCapital / data.entryTriggerPrice) * (data.target1 - data.entryTriggerPrice)).toFixed(2)}`} valueClass="text-green-400 font-bold" />
-                  <DataRow label="Profit (T2)" value={`₹${(Math.floor(investCapital / data.entryTriggerPrice) * (data.target2 - data.entryTriggerPrice)).toFixed(2)}`} valueClass="text-green-500 font-bold" />
+                  <DataRow label="Total Invested" value={`₹${(Math.floor(investCapital / (data.entryTriggerPrice || 1)) * (data.entryTriggerPrice || 0)).toFixed(2)}`} />
+                  <DataRow label="Total Risk" value={`₹${(Math.floor(investCapital / (data.entryTriggerPrice || 1)) * (data.riskPerShare || 0)).toFixed(2)}`} valueClass="text-red-400 font-bold" />
+                  <DataRow label="Profit (T1)" value={`₹${(Math.floor(investCapital / (data.entryTriggerPrice || 1)) * ((data.target1 || 0) - (data.entryTriggerPrice || 0))).toFixed(2)}`} valueClass="text-green-400 font-bold" />
+                  <DataRow label="Profit (T2)" value={`₹${(Math.floor(investCapital / (data.entryTriggerPrice || 1)) * ((data.target2 || 0) - (data.entryTriggerPrice || 0))).toFixed(2)}`} valueClass="text-green-500 font-bold" />
                 </div>
               </div>
             </div>
